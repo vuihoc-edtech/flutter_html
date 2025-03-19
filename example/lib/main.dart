@@ -29,7 +29,7 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
-const htmlData = r"""
+final htmlData = r"""
 <p id='top'><a href='#bottom'>Scroll to bottom</a></p>
       <h1>Header 1</h1>
       <h2>Header 2</h2>
