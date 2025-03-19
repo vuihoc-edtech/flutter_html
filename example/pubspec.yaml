@@ -7,8 +7,10 @@ environment:
   sdk: '>=3.2.0 <4.0.0'
 
 dependencies:
-  flutter_html: ^3.0.0
-  flutter_html_all: ^3.0.0
+  flutter_html:
+    path: ../
+  flutter_html_all:
+    path: ../flutter_html_all
   flutter:
     sdk: flutter
 
