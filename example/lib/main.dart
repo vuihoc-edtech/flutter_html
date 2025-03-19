@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
@@ -26,7 +25,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => new _MyHomePageState();
 }
 
-const htmlData = r"""
+final htmlData = r"""
 <p id='top'><a href='#bottom'>Scroll to bottom</a></p>
       <h1>Header 1</h1>
       <h2>Header 2</h2>
@@ -34,6 +33,7 @@ const htmlData = r"""
       <h4>Header 4</h4>
       <h5>Header 5</h5>
       <h6>Header 6</h6>
+      <iframe src='https://www.google.com/' width="100vh"></iframe>
       <h3>Ruby Support:</h3>
       <p>
         <ruby>

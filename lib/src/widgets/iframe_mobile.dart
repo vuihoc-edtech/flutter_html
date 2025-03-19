@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +29,7 @@ class IframeContentElement extends ReplacedElement {
 
   @override
   Widget toWidget(RenderContext context) {
+    log('', name: 'IframeContentElement.toWidget');
     final sandboxMode = attributes["sandbox"];
     return Container(
       width: width ?? (height ?? 150) * 2,
@@ -34,28 +37,87 @@ class IframeContentElement extends ReplacedElement {
       child: ContainerSpan(
         style: context.style,
         newContext: context,
-        child: webview.WebView(
-          initialUrl: src,
+        child: WebView(
           key: key,
-          javascriptMode: sandboxMode == null || sandboxMode == "allow-scripts"
-            ? webview.JavascriptMode.unrestricted
-            : webview.JavascriptMode.disabled,
-        navigationDelegate: (request) async {
-          final result = await navigationDelegate!(NavigationRequest(
-            url: request.url,
-            isForMainFrame: request.isForMainFrame,
-          ));
-          if (result == NavigationDecision.prevent) {
-            return webview.NavigationDecision.prevent;
-          } else {
-            return webview.NavigationDecision.navigate;
-          }
-        },
-          gestureRecognizers: {
-            Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer())
-          },
+          sandboxMode: sandboxMode,
+          navigationDelegate: navigationDelegate,
+          src: src ?? '',
         ),
       ),
+    );
+  }
+}
+
+class WebView extends StatefulWidget {
+  final String? sandboxMode;
+  final NavigationDelegate? navigationDelegate;
+  final String src;
+
+  const WebView({
+    this.sandboxMode,
+    this.navigationDelegate,
+    required this.src,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<WebView> createState() => _WebViewState();
+}
+
+class _WebViewState extends State<WebView> {
+  final _controller = webview.WebViewController();
+
+  @override
+  void initState() {
+    super.initState();
+    final webview.NavigationDelegate delegate = webview.NavigationDelegate(
+        onNavigationRequest: (webview.NavigationRequest request) async {
+      final result = await widget.navigationDelegate?.call(
+        NavigationRequest(
+          url: request.url,
+          isForMainFrame: request.isMainFrame,
+        ),
+      );
+      log('$result', name: '_WebViewState.initState');
+      if (result == NavigationDecision.prevent) {
+        return webview.NavigationDecision.prevent;
+      } else {
+        return webview.NavigationDecision.navigate;
+      }
+    });
+    _controller
+      ..setJavaScriptMode(
+          widget.sandboxMode == null || widget.sandboxMode == "allow-scripts"
+              ? webview.JavaScriptMode.unrestricted
+              : webview.JavaScriptMode.disabled)
+      ..setNavigationDelegate(delegate)
+      ..loadRequest(Uri.tryParse(widget.src) ?? Uri());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return webview.WebViewWidget(
+      controller: _controller,
+      // initialUrl: src,
+      // key: key,
+      // javascriptMode: sandboxMode == null || sandboxMode == "allow-scripts"
+      //     ? webview.JavaScriptMode.unrestricted
+      //     : webview.JavaScriptMode.disabled,
+      // navigationDelegate: (request) async {
+      //   final result = await navigationDelegate!(NavigationRequest(
+      //     url: request.url,
+      //     isForMainFrame: request.isForMainFrame,
+      //   ));
+      //   if (result == NavigationDecision.prevent) {
+      //     return webview.NavigationDecision.prevent;
+      //   } else {
+      //     return webview.NavigationDecision.navigate;
+      //   }
+      // },
+      gestureRecognizers: {
+        Factory<VerticalDragGestureRecognizer>(
+            () => VerticalDragGestureRecognizer())
+      },
     );
   }
 }
